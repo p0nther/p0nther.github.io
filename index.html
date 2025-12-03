@@ -1,29 +1,68 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>p0nther Blog</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p0nther | Security Research & Writeups</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1> p0nther Blog</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-    </nav>
-  </header>
+    <header>
+        <a href="index.html" class="logo">p0nther</a>
+        <nav>
+            <a href="index.html">~/home</a>
+            <a href="#">~/writeups</a>
+            <a href="#">~/payloads</a>
+            <a href="#">~/about</a>
+        </nav>
+    </header>
 
-  <main>
-    <h2> last write-ups  </h2>
-    <ul>
-      <li><a href="blog/post1.html">My first Bug </a></li>
-      <li><a href="blog/post2.html">My second Bug 2</a></li>
-    </ul>
-  </main>
+    <section class="hero">
+        <h1 class="glitch" data-text="SYSTEM_BREACH_DETECTED">SYSTEM_BREACH_DETECTED</h1>
+        <p id="typing-text"></p>
+    </section>
 
-  <footer>
-    <p>© 2025 P0nther Blog</p>
-  </footer>
+    <div class="container">
+        <h2 class="section-title">Latest_Writeups</h2>
+        <div class="grid">
+            <!-- Card 1 -->
+            <article class="card">
+                <span class="card-tag">CTF Writeup</span>
+                <h3>PicoCTF: Super Serial</h3>
+                <p>Exploiting PHP object injection vulnerabilities to bypass authentication and retrieve the flag.</p>
+                <a href="post.html" class="card-link">READ_DATA</a>
+            </article>
+
+            <!-- Card 2 -->
+            <article class="card">
+                <span class="card-tag">Payloads</span>
+                <h3>Reverse Shell Cheatsheet</h3>
+                <p>A collection of one-liner reverse shells for various languages and environments.</p>
+                <a href="#" class="card-link">ACCESS_DB</a>
+            </article>
+
+            <!-- Card 3 -->
+            <article class="card">
+                <span class="card-tag">Research</span>
+                <h3>Buffer Overflow Basics</h3>
+                <p>Understanding the stack, registers, and how to overwrite EIP to control execution flow.</p>
+                <a href="#" class="card-link">EXECUTE</a>
+            </article>
+            
+             <!-- Card 4 -->
+            <article class="card">
+                <span class="card-tag">Web Sec</span>
+                <h3>SQL Injection Advanced</h3>
+                <p>Going beyond ' OR 1=1 -- to blind injection and time-based attacks.</p>
+                <a href="#" class="card-link">INJECT</a>
+            </article>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 0xHACKER. All rights reserved. <br> <span style="color: var(--accent-color)">root@localhost</span></p>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
