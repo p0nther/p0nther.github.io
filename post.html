@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writeup | p0nther</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <a href="index.html" class="logo">p0nther</a>
+        <nav>
+            <a href="index.html">~/home</a>
+            <a href="#">~/writeups</a>
+            <a href="#">~/payloads</a>
+            <a href="#">~/about</a>
+        </nav>
+    </header>
+
+    <article class="post-content">
+        <div class="post-meta">
+            <span>Date: 2025-12-03</span> | <span>Category: CTF Writeup</span> | <span>Author: root</span>
+        </div>
+        <h1>PicoCTF: Super Serial</h1>
+
+        <p>This challenge involves exploiting a PHP Object Injection vulnerability. The application uses `serialize()`
+            and `unserialize()` on user-controlled data without proper validation.</p>
+
+        <h2>Reconnaissance</h2>
+        <p>Upon visiting the site, we see a login form. Checking the source code reveals a hint about `robots.txt`.</p>
+
+        <pre><code>User-agent: *
+Disallow: /admin.phps
+Disallow: /super-secret-flag.txt</code></pre>
+
+        <p>We can try to access `index.phps` to see the source code of the index page.</p>
+
+        <h2>Exploitation</h2>
+        <p>The code reveals a class `access_log` with a `__toString` method that reads a file. If we can inject a
+            serialized object of this class, we can trigger the file read.</p>
+
+        <pre><code>class access_log {
+    public $log_file;
+
+    function __construct($lf) {
+        $this->log_file = $lf;
+    }
+
+    function __toString() {
+        return read_file($this->log_file);
+    }
+}</code></pre>
+
+        <p>We craft a payload to read `../flag.txt`.</p>
+
+        <h2>Payload</h2>
+        <pre><code>O:10:"access_log":1:{s:8:"log_file";s:11:"../flag.txt";}</code></pre>
+
+        <p>Encoding this payload and sending it via the cookie results in the flag being printed.</p>
+
+        <div style="margin-top: 3rem; border-top: 1px dashed #333; padding-top: 1rem;">
+            <a href="index.html" class="card-link"><- BACK_TO_ROOT</a>
+        </div>
+    </article>
+
+    <footer>
+        <p>&copy; 2025 0xHACKER. All rights reserved. <br> <span
+                style="color: var(--accent-color)">root@localhost</span></p>
+    </footer>
+</body>
+
+</html>
