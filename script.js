@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const textElement = document.getElementById('typing-text');
-    const textToType = "Welcome to my digital playground. Here you will find CTF writeups, payloads, and security research. Proceed with caution.";
+    const textToType = "Welcome to my digital blog, This is the beta Blog .";
     let index = 0;
 
     function type() {
